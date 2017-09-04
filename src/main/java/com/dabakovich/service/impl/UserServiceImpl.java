@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 //        System.out.println("YES!");
         usersWithSchedule
                 .stream()
-                .filter(user -> user.getSchedule().isActive())
+                .filter(user -> user.getSchedule().isActive() && user.getSchedule().getStartDate() != null)
                 .forEach(user -> sendDayPlaneForDateMessage(user, nowDate));
         usersWithSchedule
                 .stream()

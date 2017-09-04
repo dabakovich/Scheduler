@@ -48,7 +48,7 @@ public class TelegramService {
 
         try {
             httpsService.sendPost(telegramURL + "/" + SetWebhook.PATH, null, httpEntity);
-            logger.info("Webhook configured for bot " + serverURL);
+            logger.info("Successfully configured webhook service for bot " + serverURL);
         } catch (IOException e) {
             e.printStackTrace();
         }

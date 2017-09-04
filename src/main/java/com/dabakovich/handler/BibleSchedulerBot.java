@@ -4,6 +4,8 @@ import com.dabakovich.entity.Schedule;
 import com.dabakovich.entity.ScheduleType;
 import com.dabakovich.service.UserService;
 import com.dabakovich.service.utils.LanguageContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ import java.util.*;
 public class BibleSchedulerBot {
 
     private UserService userService;
+    private final Logger logger = LoggerFactory.getLogger(BibleSchedulerBot.class);
     private final LanguageContainer languageContainer;
     private final ReloadableResourceBundleMessageSource M;
 
@@ -40,6 +43,10 @@ public class BibleSchedulerBot {
         SendMessage message = new SendMessage();
         if (update.hasMessage() && update.getMessage().hasText()) {
             State state = userService.getState(update.getMessage().getFrom().getId());
+            logger.debug("Handled update from Telegram user {} with text {} and state {}", update.getMessage().getFrom().getId(), update.getMessage().getText(), state);
+            if (update.getMessage().hasEntities() && update.getMessage().getEntities().stream().anyMatch(e -> e.getType().equals("bot_command")))  {
+                state = State.START_STATE;
+            }
             switch (state) {
                 case START_STATE:
                     message = messageOnStartCommand(update);
@@ -68,6 +75,17 @@ public class BibleSchedulerBot {
 
         }
         return message;
+    }
+
+    public SendMessage messageOnStartCommand(Update update) {
+        Message message = update.getMessage();
+        User telegramUser = message.getFrom();
+        com.dabakovich.entity.User user = userService.getByTelegramIdOrSave(telegramUser);
+        user.setState(State.MAIN_MENU);
+        userService.save(user);
+        logger.info("The bot started chat with new user: {}, {}, {}", user.getTelegramId(), user.getUserName(), user.getLanguageTag());
+
+        return sendMessageDefault(update);
     }
 
     private SendMessage messageOnMainMenu(Update update) {
@@ -141,7 +159,7 @@ public class BibleSchedulerBot {
         String[] scheduleTypes = M.getMessage("telegram.schedulers", null, locale).split(",");
         StringBuilder builder = new StringBuilder(M.getMessage("telegram.message.choose_scheduler", null, locale));
         for (int i = 0; i < scheduleTypes.length; i++) {
-            builder.append((i + 1) + ". " + scheduleTypes[i].split(":")[0] + ".\n");
+            builder.append(i + 1).append(". ").append(scheduleTypes[i].split(":")[0]).append(".\n");
         }
 
         return new SendMessage()
@@ -175,8 +193,10 @@ public class BibleSchedulerBot {
     }
 
     private SendMessage onPauseChosen(Update update) {
-        userService.togglePauseForTelegramUser(update.getMessage().getFrom().getId());
+        Integer tId = update.getMessage().getFrom().getId();
+        userService.togglePauseForTelegramUser(tId);
         ReplyKeyboardMarkup keyboard = getSettingsKeyboard(update);
+        logger.info("Paused scheduling for telegram user {}", tId);
 
         return new SendMessage()
                 .setChatId(update.getMessage().getChatId())
@@ -185,8 +205,11 @@ public class BibleSchedulerBot {
     }
 
     private SendMessage onResumeChosen(Update update) {
-        userService.togglePauseForTelegramUser(update.getMessage().getFrom().getId());
+        Integer tId = update.getMessage().getFrom().getId();
+        userService.togglePauseForTelegramUser(tId);
         ReplyKeyboardMarkup keyboard = getSettingsKeyboard(update);
+        logger.info("Resumed scheduling for telegram user {}", tId);
+
 
         return new SendMessage()
                 .setChatId(update.getMessage().getChatId())
@@ -213,11 +236,13 @@ public class BibleSchedulerBot {
     }
 
     private SendMessage onYesChosenForStopSchedule(Update update) {
-        userService.stopScheduleByTelegramId(update.getMessage().getFrom().getId());
         com.dabakovich.entity.User user = userService.getByTelegramId(update.getMessage().getFrom().getId());
+        logger.info("Deleting {} scheduling with start date {} for user {}", user.getSchedule().getScheduleType(), user.getSchedule().getStartDate(), user.getUserName());
+        user.setSchedule(null);
         user.setState(State.MAIN_MENU);
         userService.save(user);
         ReplyKeyboardMarkup keyboard = getMainMenuKeyboard(user);
+        logger.info("Deleted scheduling for user {}", user.getUserName());
 
         return new SendMessage()
                 .setChatId(update.getMessage().getChatId())
@@ -249,17 +274,6 @@ public class BibleSchedulerBot {
                 .setReplyMarkup(keyboard);
     }
 
-    public SendMessage messageOnStartCommand(Update update) {
-        Message message = update.getMessage();
-        User telegramUser = message.getFrom();
-
-        com.dabakovich.entity.User user = userService.getByTelegramIdOrSave(telegramUser);
-        user.setState(State.MAIN_MENU);
-        userService.save(user);
-        ReplyKeyboardMarkup keyboard = getMainMenuKeyboard(user);
-        return sendMessageDefault(update);
-    }
-
     private SendMessage messageOnNewSchedule(Update update, State state) {
         Message message = update.getMessage();
         com.dabakovich.entity.User user = userService.getOne(message.getFrom());
@@ -281,6 +295,7 @@ public class BibleSchedulerBot {
                 user.setSchedule(schedule);
                 user.setState(State.NEW_SCHEDULER_DATE);
                 userService.save(user);
+                logger.info("Started creation of {} scheduler for user {}", schedule.getScheduleType(), user.getUserName());
                 ReplyKeyboardMarkup keyboard = getEnterDateKeyboard(user);
                 return new SendMessage()
                         .setChatId(message.getChatId())
@@ -310,6 +325,7 @@ public class BibleSchedulerBot {
                     schedule.setStartDate(startDate);
                     user.setSchedule(schedule);
                     userService.save(user);
+                    logger.info("Successfully created {} schedule for {} with start date {}", schedule.getScheduleType(), user.getUserName(), startDate);
                     return messageOnScheduleCreated(update);
                 } else return sendChooseOptionMessage(update, state);
             } case NEW_SCHEDULER_MANUAL_DATE: {
@@ -323,8 +339,9 @@ public class BibleSchedulerBot {
                     Schedule schedule = user.getSchedule();
                     schedule.setStartDate(startDate);
                     user.setSchedule(schedule);
-                    user.setState(State.SEND_CURRENT_PASSAGES_CONFIRM);
                     userService.save(user);
+                    logger.info("Successfully created schedule for {} with schedule type {} and start date {}", user.getUserName(), schedule.getScheduleType(), startDate);
+
                     return messageOnScheduleCreated(update);
                 } else return sendSomeErrorMessage(update, state);
             }
