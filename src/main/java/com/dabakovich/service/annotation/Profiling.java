@@ -1,4 +1,4 @@
-package com.dabakovich.service.annotations;
+package com.dabakovich.service.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

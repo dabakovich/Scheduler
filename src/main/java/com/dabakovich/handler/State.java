@@ -1,0 +1,8 @@
+package com.dabakovich.handler;
+
+/**
+ * Created by dabak on 31.08.2017, 21:49.
+ */
+public enum State {
+    START_STATE, MAIN_MENU, NEW_SCHEDULER, NEW_SCHEDULER_DATE, SETTINGS_MENU, STOP_SCHEDULE, SEND_CURRENT_PASSAGES_CONFIRM, NEW_SCHEDULER_MANUAL_DATE, LANGUAGE
+}

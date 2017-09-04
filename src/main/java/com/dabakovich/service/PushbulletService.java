@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,11 @@ public class PushbulletService {
 
         System.out.println("SENT request to " + URL_PUSHES + " with parameters " + parameters);
 //        logger.info("SENT request to " + URL_PUSHES + " with parameters " + parameters);
-        httpsService.sendPost(URL_PUSHES, new Header[]{TOKEN_HEADER}, parameters);
+        try {
+            httpsService.sendPost(URL_PUSHES, new Header[]{TOKEN_HEADER}, parameters);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void pushLink(String title, String body, String link, String email) {
@@ -49,6 +54,10 @@ public class PushbulletService {
 
 //        System.out.println("SENT request to " + URL_PUSHES + " with parameters " + parameters);
 //        logger.info("SENT request to " + URL_PUSHES + " with parameters " + parameters);
-        httpsService.sendPost(URL_PUSHES, new Header[]{TOKEN_HEADER}, parameters);
+        try {
+            httpsService.sendPost(URL_PUSHES, new Header[]{TOKEN_HEADER}, parameters);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

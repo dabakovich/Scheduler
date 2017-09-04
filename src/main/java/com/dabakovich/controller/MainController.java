@@ -33,9 +33,9 @@ public class MainController {
         pushbulletService.pushNote("Message", message, "dabakovich@gmail.com");
     }
 
-    @GetMapping("/{name}")
-    public User getUser(@PathVariable("name") String name) {
-        return userRepository.findByName(name);
+    @GetMapping("/{userName}")
+    public User getUser(@PathVariable("userName") String userName) {
+        return userRepository.findByUserName(userName);
     }
 
     @PostMapping

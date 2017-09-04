@@ -14,7 +14,8 @@ public class Passage {
     }
 
     public void setBook(String book) {
-        this.book = book.substring(0, getLastIndexOfLetter(book) + 1);
+        this.book = book;
+//        this.book = book.substring(0, getLastIndexOfLetter(book) + 1);
     }
 
     public String getVerses() {
@@ -22,7 +23,8 @@ public class Passage {
     }
 
     public void setVerses(String verses) {
-        this.verses = verses.substring(getLastIndexOfLetter(verses) + 2);
+        this.verses = verses;
+//        this.verses = verses.substring(getLastIndexOfLetter(verses) + 2);
     }
 
     private int getLastIndexOfLetter(String string) {

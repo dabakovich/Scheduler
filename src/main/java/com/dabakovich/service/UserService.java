@@ -2,6 +2,8 @@ package com.dabakovich.service;
 
 import com.dabakovich.entity.DayPlane;
 import com.dabakovich.entity.User;
+import com.dabakovich.handler.State;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 
 import java.time.LocalDate;
 
@@ -10,11 +12,29 @@ import java.time.LocalDate;
  */
 public interface UserService {
 
-    User getByName(String name);
+    User getOne(org.telegram.telegrambots.api.objects.User telegramUser);
 
-    void sendDayPlane(User user, DayPlane dayPlane, LocalDate date);
+    User getByTelegramId(Integer telegramId);
+
+    State getState(Integer telegramId);
+
+    User getByTelegramIdOrSave(org.telegram.telegrambots.api.objects.User user);
+
+    boolean togglePauseForTelegramUser(Integer telegramId);
+
+    void save(User user);
+
+    void setState(Integer telegramId, State state);
+
+    SendMessage dayPlaneForDateMassage(User user, LocalDate date);
+
+    void stopScheduleByTelegramId(Integer telegramId);
+
+    void setLanguageByTelegramId(Integer telegramId, String messageText);
 
     User getOneOrSave(User user);
 
     void setLocaleForUser(String id, String locale);
+
+    SendMessage dayPlaneForDateMassage(User user, DayPlane dayPlane, LocalDate date);
 }

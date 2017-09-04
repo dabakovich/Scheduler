@@ -1,6 +1,6 @@
 package com.dabakovich.service.bpp;
 
-import com.dabakovich.service.annotations.Profiling;
+import com.dabakovich.service.annotation.Profiling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;

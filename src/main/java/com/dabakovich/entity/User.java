@@ -1,15 +1,24 @@
 package com.dabakovich.entity;
 
+import com.dabakovich.handler.State;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "user")
 public class User {
 
     private String id;
-    private int chatId;
-    private String name;
-    private String email;
+    @JsonProperty("telegram-id")
+    private int telegramId;
+    @JsonProperty("username")
+    private String userName;
+    private Schedule schedule;
+    private State state = State.START_STATE;
     private String languageTag = "uk";
+
+    public void moveStartDateOneDayAhead() {
+        this.schedule.setStartDate(this.schedule.getStartDate().plusDays(1));
+    }
 
     public String getId() {
         return id;
@@ -19,28 +28,36 @@ public class User {
         this.id = id;
     }
 
-    public int getChatId() {
-        return chatId;
+    public int getTelegramId() {
+        return telegramId;
     }
 
-    public void setChatId(int chatId) {
-        this.chatId = chatId;
+    public void setTelegramId(int telegramId) {
+        this.telegramId = telegramId;
     }
 
-    public String getName() {
-        return name;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getEmail() {
-        return email;
+    public Schedule getSchedule() {
+        return schedule;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
     }
 
     public String getLanguageTag() {
@@ -55,9 +72,10 @@ public class User {
     public String toString() {
         return "User{" +
                 "id='" + id + '\'' +
-                ", chatId=" + chatId +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
+                ", telegramId=" + telegramId +
+                ", userName='" + userName + '\'' +
+                ", schedule=" + schedule +
+                ", state=" + state +
                 ", languageTag='" + languageTag + '\'' +
                 '}';
     }

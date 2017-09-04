@@ -28,4 +28,11 @@ public class DayPlaneServiceImpl implements DayPlaneService {
         }
         dayPlaneRepository.save(dayPlane);
     }
+
+    public static void main(String[] args) {
+        String test = "23:20-39\r";
+        System.out.println(test.indexOf("\r"));
+        test = test.substring(0, test.indexOf("\r"));
+        System.out.println(test);
+    }
 }

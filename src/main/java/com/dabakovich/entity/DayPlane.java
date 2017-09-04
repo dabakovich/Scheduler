@@ -15,6 +15,7 @@ public class DayPlane {
     @Id
     private String id;
 
+    @Indexed
     private ScheduleType scheduleType;
 
     @Indexed
